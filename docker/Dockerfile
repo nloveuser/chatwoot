@@ -128,7 +128,11 @@ RUN apk update && apk add --no-cache \
   imagemagick \
   git \
   vips \
+  && apk add --no-cache tdlib 2>/dev/null \
+  || apk add --no-cache --repository https://dl-cdn.alpinelinux.org/alpine/edge/community tdlib \
   && gem install bundler -v "$BUNDLER_VERSION"
+
+ENV TDLIB_LIB_PATH=/usr/lib/libtdjson.so
 
 COPY --from=node /usr/local/bin/node /usr/local/bin/
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
