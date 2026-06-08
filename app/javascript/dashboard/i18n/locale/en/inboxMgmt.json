@@ -436,6 +436,25 @@
           "SUBTITLE": "You have to configure the webhook URL in LINE application with the URL mentioned here."
         }
       },
+      "TELEGRAM_ACCOUNT_CHANNEL": {
+        "TITLE": "Telegram Account Channel",
+        "DESC": "Connect a personal Telegram account via Messenger Gateway and support your customers.",
+        "GATEWAY_URL": {
+          "LABEL": "Gateway URL",
+          "SUBTITLE": "URL of your chatwoot-messenger-gateway instance (e.g. https://gateway.example.com).",
+          "PLACEHOLDER": "https://gateway.example.com",
+          "ERROR": "Please enter a valid URL"
+        },
+        "WEBHOOK_ID": {
+          "LABEL": "Webhook ID",
+          "SUBTITLE": "The CHATWOOT_WEBHOOK_ID_TELEGRAM value from your gateway .env file.",
+          "PLACEHOLDER": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+        },
+        "SUBMIT_BUTTON": "Create Telegram Account Channel",
+        "API": {
+          "ERROR_MESSAGE": "We were not able to save the Telegram Account channel"
+        }
+      },
       "TELEGRAM_CHANNEL": {
         "TITLE": "Telegram Channel",
         "DESC": "Integrate with Telegram channel and start supporting your customers.",
@@ -486,6 +505,10 @@
           "TELEGRAM": {
             "TITLE": "Telegram",
             "DESCRIPTION": "Configure Telegram channel using Bot token"
+          },
+          "TELEGRAM_ACCOUNT": {
+            "TITLE": "Telegram Account",
+            "DESCRIPTION": "Connect a personal Telegram account via Messenger Gateway"
           },
           "LINE": {
             "TITLE": "Line",

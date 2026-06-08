@@ -71,6 +71,7 @@ const isActive = computed(() => {
     'whatsapp',
     'sms',
     'telegram',
+    'telegram_account',
     'line',
     'instagram',
     'tiktok',
