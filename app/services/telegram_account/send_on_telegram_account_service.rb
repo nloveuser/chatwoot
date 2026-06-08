@@ -1,45 +1,46 @@
-class TelegramAccount::SendOnTelegramAccountService < Base::SendOnChannelService
-  private
+module TelegramAccount
+  class SendOnTelegramAccountService < Base::SendOnChannelService
+    private
 
-  def channel_class
-    Channel::TelegramAccount
-  end
-
-  def perform_reply
-    return if message.content.blank? && message.attachments.blank?
-
-    response = HTTParty.post(
-      channel.webhook_endpoint,
-      body: build_payload.to_json,
-      headers: { 'Content-Type' => 'application/json' },
-      timeout: 10
-    )
-
-    unless response.success?
-      message.update!(
-        external_error: "Gateway error: #{response.code}",
-        status: :failed
-      )
+    def channel_class
+      Channel::TelegramAccount
     end
-  end
 
-  def build_payload
-    contact = message.conversation.contact
-    {
-      event: 'message_created',
-      message_type: 'outgoing',
-      content: message.content,
-      private: false,
-      conversation: {
-        meta: {
-          channel: 'telegram',
-          sender: {
-            phone_number: contact.phone_number,
-            additional_attributes: contact.additional_attributes,
-            custom_attributes: contact.custom_attributes
+    def perform_reply
+      client = TelegramAccount::ClientManager.get(channel.id)
+      unless client&.alive?
+        mark_failed('TDLib client not running for this channel')
+        return
+      end
+
+      chat_id = message.conversation.additional_attributes['telegram_chat_id']
+      unless chat_id
+        mark_failed('No telegram_chat_id in conversation attributes')
+        return
+      end
+
+      client.request(build_send_message(chat_id.to_i))
+    end
+
+    def build_send_message(chat_id)
+      {
+        '@type'   => 'sendMessage',
+        'chat_id' => chat_id,
+        'input_message_content' => {
+          '@type' => 'inputMessageText',
+          'text'  => {
+            '@type' => 'formattedText',
+            'text'  => message.content.to_s
           }
         }
       }
-    }
+    end
+
+    def mark_failed(reason)
+      message.update!(
+        external_error: reason,
+        status:         :failed
+      )
+    end
   end
 end

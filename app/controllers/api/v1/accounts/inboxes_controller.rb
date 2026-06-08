@@ -79,7 +79,44 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
     render status: :ok, json: { message: I18n.t('messages.inbox_deletetion_response') }
   end
 
+  def telegram_auth_state
+    channel = telegram_account_channel
+    return unless channel
+
+    render json: { auth_state: channel.auth_state, error_message: channel.error_message }
+  end
+
+  def telegram_verify_code
+    channel = telegram_account_channel
+    return unless channel
+
+    if TelegramAccount::ClientManager.submit_code(channel.id, params[:code])
+      render json: { auth_state: channel.reload.auth_state }
+    else
+      render json: { error: 'Client not running' }, status: :unprocessable_entity
+    end
+  end
+
+  def telegram_verify_password
+    channel = telegram_account_channel
+    return unless channel
+
+    if TelegramAccount::ClientManager.submit_password(channel.id, params[:password])
+      render json: { auth_state: channel.reload.auth_state }
+    else
+      render json: { error: 'Client not running' }, status: :unprocessable_entity
+    end
+  end
+
   private
+
+  def telegram_account_channel
+    unless @inbox.channel.is_a?(Channel::TelegramAccount)
+      head :not_found
+      return nil
+    end
+    @inbox.channel
+  end
 
   def fetch_inbox
     @inbox = Current.account.inboxes.find(params[:id])
