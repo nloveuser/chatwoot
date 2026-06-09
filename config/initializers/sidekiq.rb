@@ -30,6 +30,18 @@ Sidekiq.configure_server do |config|
     config[:skip_default_job_logging] = true
     config.logger.level = Logger.const_get(ENV.fetch('LOG_LEVEL', 'info').upcase.to_s)
   end
+
+  config.on(:startup) do
+    TdlibReceiver.start
+    Channel::TelegramAccount.where(auth_state: 'ready').find_each do |channel|
+      TelegramAccount::MessageListenerJob.perform_later(channel.id)
+    end
+  end
+
+  config.on(:shutdown) do
+    TelegramAccount::ClientManager.stop_all
+    TdlibReceiver.stop
+  end
 end
 
 # https://github.com/ondrejbartas/sidekiq-cron
